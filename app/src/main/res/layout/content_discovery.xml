@@ -1,0 +1,11 @@
+<!--Removed line app:layout_behavior="@string/appbar_scrolling_view_behavior"
+that was right before tool:layout line. Circle back for a better solution-->
+
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment"
+    android:name="com.example.android.popularmovies.DiscoveryActivityFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:layout="@layout/fragment_discovery" />
