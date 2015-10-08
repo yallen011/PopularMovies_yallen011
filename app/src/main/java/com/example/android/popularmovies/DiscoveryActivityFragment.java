@@ -1,5 +1,7 @@
 package com.example.android.popularmovies;
 
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,5 +20,19 @@ public class DiscoveryActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_discovery, container, false);
+    }
+
+    public class FetchMovieImageTask extends AsyncTask<Void,Void,Bitmap>{
+
+
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+        }
     }
 }
