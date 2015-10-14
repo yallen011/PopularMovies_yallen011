@@ -10,9 +10,11 @@
     tools:context="com.example.android.popularmovies.DiscoveryActivityFragment"
     tools:showIn="@layout/activity_discovery">
 
-    <ListView
-        android:id="@+id/moviesListView"
+    <GridView
+        android:id="@+id/moviesGridView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:numColumns="auto_fit"
+        android:gravity="center"/>
 
 </FrameLayout>

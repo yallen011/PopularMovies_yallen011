@@ -1,14 +1,15 @@
 package com.example.android.popularmovies.Adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.example.android.popularmovies.DiscoveryActivityFragment;
 import com.example.android.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
@@ -22,33 +23,53 @@ public class MovieArrayAdapter extends ArrayAdapter<String> {
 
     private final String LOG_TAG = MovieArrayAdapter.class.getSimpleName();
 
-    private final Context context;
-    private final ArrayList<String> values;
+    private final Context mContext;
+    private ArrayList<String> mValues = new ArrayList<>();
+    private List<Integer> mPosterIds;
 
-    public MovieArrayAdapter(Context context,int layoutResId, ArrayList<String> values){
-        super(context, layoutResId, values);
-        this.context = context;
-        this.values = values;
+    public MovieArrayAdapter(Context context,int layoutResId, ArrayList<String> values, List<Integer> posterIds){
+        super(context,layoutResId, values);
+        this.mContext = context;
+        this.mValues = values;
+        mPosterIds = posterIds;
     }
 
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-
-       View rowView = inflater.inflate(R.layout.movie_list_detail, parent, false);
-        if(context ==null){
-            Log.e(LOG_TAG,"Context is null");
+       if(convertView == null){
+           LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+           convertView = inflater.inflate(R.layout.movie_list_detail, parent, false);
         }
-        ImageView imageView = (ImageView) rowView.findViewById(R.id.movie_imageView_left);
+        ImageView imageView = (ImageView) convertView.findViewById(R.id.movie_imageView_left);
+        TextView urlView = (TextView) convertView.findViewById(R.id.url);
 
-        Log.i(LOG_TAG, "url string: "+ values.get(position));
+        String url = getItem(position);
+        urlView.setText(url);
+        Log.i(LOG_TAG, "url string: " + url);
 
-        Picasso.with(this.context)
-                .load(values.get(position))
-                .into(imageView);
+//        Picasso.with(getContext())
+//                .load(url)
+//                .into(imageView);
+
+        //gets the drawable based on the drawable ids for the drawable.
+        imageView.setImageDrawable(mContext.getResources().getDrawable(mPosterIds.get(position)));
 
         return convertView;
+    }
+
+    @Override
+    public int getCount() {
+        return mValues.size();
+    }
+
+    @Override
+    public String getItem(int position) {
+        return mValues.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 }

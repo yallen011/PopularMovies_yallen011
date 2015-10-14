@@ -8,4 +8,5 @@ that was right before tool:layout line. Circle back for a better solution-->
     android:name="com.example.android.popularmovies.DiscoveryActivityFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:layout="@layout/fragment_discovery" />

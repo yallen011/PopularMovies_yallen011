@@ -2,15 +2,17 @@ package com.example.android.popularmovies;
 
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ListView;
+
+import com.example.android.popularmovies.Adapters.MovieArrayAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +26,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import com.example.android.popularmovies.Adapters.MovieArrayAdapter;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -33,8 +34,8 @@ public class DiscoveryActivityFragment extends Fragment {
 
     private final String LOG_TAG = DiscoveryActivityFragment.class.getSimpleName();
 
-    private MovieArrayAdapter mMovieAdapter;
-    private ArrayList<String> movies;
+    private ArrayAdapter<String> mMovieAdapter;
+    private ArrayList<String> movies = new ArrayList<String>();
 
     public DiscoveryActivityFragment() {
     }
@@ -44,22 +45,29 @@ public class DiscoveryActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_discovery, container, false);
 
-        FetchMovieImageTask fetchMovieImageTask = new FetchMovieImageTask();
-        fetchMovieImageTask.execute();
+       // FetchMovieImageTask fetchMovieImageTask = new FetchMovieImageTask();
+        //fetchMovieImageTask.execute();
+
+        GridView movieListView = (GridView) rootView.findViewById(R.id.moviesGridView);
+        createMoviesArray();
+
+        //add images by id instead of passing in the entire array. android has problems with
+        //image loading.
+        List<Integer> posterIds = new ArrayList<>();
+        posterIds.add(R.drawable.movie_poster_one);
+        posterIds.add(R.drawable.movie_poster_two);
 
         mMovieAdapter = new MovieArrayAdapter(
                 getContext(),
                 R.layout.movie_list_detail,
-               movies
-            );
-
-        ListView movieListView = (ListView) rootView.findViewById(R.id.moviesListView);
+                movies,
+                posterIds
+        );
         movieListView.setAdapter(mMovieAdapter);
-
-
 
         return rootView;
     }
+
 
     public class FetchMovieImageTask extends AsyncTask<Void,Void,List<FetchMovieImageTask.MovieInfo>>{
 
@@ -121,6 +129,7 @@ public class DiscoveryActivityFragment extends Fragment {
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
                     // Nothing to do.
+                    Log.e(LOG_TAG,"Input Stream is null; returning null");
                     return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -144,7 +153,7 @@ public class DiscoveryActivityFragment extends Fragment {
 
             }catch(IOException io){
 
-                Log.e(LOG_TAG, "Error ", io);
+                Log.e(LOG_TAG, "Error: " + io.getMessage(), io);
                 // If the code didn't successfully get the movie data, there's no point in attemping
                 // to parse it.
                 return null;
@@ -166,7 +175,7 @@ public class DiscoveryActivityFragment extends Fragment {
                 return getMovieDataFromJSON(movieDBStr);
 
             }catch (JSONException e) {
-                Log.e(LOG_TAG,e.getMessage(), e);
+                Log.e(LOG_TAG,"Error retrieving data: " + e.getMessage(), e);
                 e.printStackTrace();
             }
 
@@ -180,15 +189,16 @@ public class DiscoveryActivityFragment extends Fragment {
             //add images the listview
             /*String posterStr;
             String posterUrl;*/
-            mMovieAdapter.clear();
+            if (movieInfo != null) {
+                mMovieAdapter.clear();
 
-            for(MovieInfo info : movieInfo){
+                for (MovieInfo info : movieInfo) {
 
                /* posterStr =  info.getPoster();
                 posterUrl = buildPosterUri(posterStr);*/
-                movies.add(info.getPoster());
+                    movies.add(info.getPoster());
+                }
             }
-
         }
 
         /**
@@ -199,7 +209,7 @@ public class DiscoveryActivityFragment extends Fragment {
         private String buildPosterUri(String poster){
 
             final String POSTER_BASE_URL = "http://image.tmdb.org/t/p/";
-            final String size ="w185";
+            final String size ="w185/";
 
             //url for movie poster
             Uri posterUri = Uri.parse(POSTER_BASE_URL).buildUpon()
@@ -224,28 +234,37 @@ public class DiscoveryActivityFragment extends Fragment {
             final String RELEASE_DATE="release_date";
             final String POSTER_PATH="poster_path";
 
-            JSONObject movieJson = new JSONObject(movieDBJsonStr);
-            JSONArray movieResultsArray = movieJson.getJSONArray(MOVIE_RESULTS);
-
             List<MovieInfo> resultsList = new ArrayList<MovieInfo>();
-            for (int i=0; i < movieResultsArray.length(); i++){
+            try {
 
-                JSONObject result = movieResultsArray.getJSONObject(i);
+                JSONObject movieJson = new JSONObject(movieDBJsonStr);
+                JSONArray movieResultsArray = movieJson.getJSONArray(MOVIE_RESULTS);
 
-                String title = result.getString(ORIGINAL_TITLE);
-                String synopsis = result.getString(OVERVIEW);
-                String releaseDate = result.getString(RELEASE_DATE);
-                String posterPath = result.getString(POSTER_PATH);
-                String voteAvg = result.getString(VOTE_AVERAGE);
 
-                MovieInfo movieInfo = new MovieInfo();
-                movieInfo.setTitle(title);
-                movieInfo.setSynopsis(synopsis);
-                movieInfo.setReleaseDate(releaseDate);
-                movieInfo.setPoster(buildPosterUri(posterPath));
-                movieInfo.setVoteAverage(voteAvg);
+                for (int i = 0; i < movieResultsArray.length(); i++) {
 
-                resultsList.add(movieInfo);
+                    JSONObject result = movieResultsArray.getJSONObject(i);
+
+                    String title = result.getString(ORIGINAL_TITLE);
+                    String synopsis = result.getString(OVERVIEW);
+                    String releaseDate = result.getString(RELEASE_DATE);
+                    String posterPath = result.getString(POSTER_PATH);
+                    String voteAvg = result.getString(VOTE_AVERAGE);
+
+
+
+                    MovieInfo movieInfo = new MovieInfo();
+                    movieInfo.setTitle(title);
+                    movieInfo.setSynopsis(synopsis);
+                    movieInfo.setReleaseDate(releaseDate);
+                    movieInfo.setPoster(buildPosterUri(posterPath));
+                    movieInfo.setVoteAverage(voteAvg);
+
+                    resultsList.add(movieInfo);
+                }
+            }catch(JSONException e){
+                Log.e(LOG_TAG, "error parsing json: " + e);
+                e.getStackTrace();
             }
 
             return resultsList;
@@ -301,5 +320,14 @@ public class DiscoveryActivityFragment extends Fragment {
             }
 
         }
+    }
+
+    private void createMoviesArray(){
+
+        movies.add("http://image.tmdb.org/t/p/w92//AjbENYG3b8lhYSkdrWwlhVLRPKR.jpg");
+        movies.add("http://image.tmdb.org/t/p/w92//slobKil2T1ASQbItglLdGfAHJqC.jpg");
+
+       /* movies.add("apples");
+        movies.add("oranges");*/
     }
 }
