@@ -1,5 +1,6 @@
 package com.example.android.popularmovies;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -26,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.android.popularmovies.DiscoveryActivityFragment.FetchMovieImageTask.MovieInfo;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -36,6 +39,7 @@ public class DiscoveryActivityFragment extends Fragment {
 
     private ArrayAdapter<String> mMovieAdapter;
     private ArrayList<String> movies = new ArrayList<String>();
+    private List<MovieInfo> movieInfoList = new ArrayList<>();
 
     public DiscoveryActivityFragment() {
     }
@@ -48,7 +52,7 @@ public class DiscoveryActivityFragment extends Fragment {
        // FetchMovieImageTask fetchMovieImageTask = new FetchMovieImageTask();
         //fetchMovieImageTask.execute();
 
-        GridView movieListView = (GridView) rootView.findViewById(R.id.moviesGridView);
+        final GridView movieGridView = (GridView) rootView.findViewById(R.id.moviesGridView);
         createMoviesArray();
 
         //add images by id instead of passing in the entire array. android has problems with
@@ -63,9 +67,44 @@ public class DiscoveryActivityFragment extends Fragment {
                 movies,
                 posterIds
         );
-        movieListView.setAdapter(mMovieAdapter);
+        movieGridView.setAdapter(mMovieAdapter);
+
+        movieGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+               Log.i(LOG_TAG, "gridview count: "+ Integer.toString(movieGridView.getCount()));
+                //get movie details for selected movie
+                //MovieInfo movieInfo = movieInfoList.get(position);
+
+                //pass movie info into DetailsActivity
+                Intent detailIntent = new Intent(getActivity(), DetailsActivity.class);
+
+//                        detailIntent.putExtra("title", movieInfo.getTitle());
+//                        detailIntent.putExtra("release_date", movieInfo.getReleaseDate());
+//                        detailIntent.putExtra("rating", movieInfo.getVoteAverage());
+//                        detailIntent.putExtra("synopsis", movieInfo.getSynopsis());
+//                        detailIntent.putExtra("poster", movieInfo.getPoster());
+                startActivity(addMovieDetailsToIntent(detailIntent));
+            }
+        });
 
         return rootView;
+    }
+
+    private Intent addMovieDetailsToIntent(Intent detailIntent) {
+
+        String summary = "During a manned mission to Mars, Astronaut Mark Watney is presumed dead after a fierce storm and left behind by his crew."
+        +"But Watney has survived and finds himself stranded and alone on the hostile planet."
+        + "With only meager supplies, he must draw upon his ingenuity, wit and spirit to subsist and find a way to signal to Earth that he is alive.";
+
+        detailIntent.putExtra("title","The Martian");
+        detailIntent.putExtra("release_date", "2015-10-02");
+        detailIntent.putExtra("rating", "5.5");
+        detailIntent.putExtra("synopsis", summary);
+        detailIntent.putExtra("poster", "poster_url");
+
+        return detailIntent;
     }
 
 
@@ -273,11 +312,11 @@ public class DiscoveryActivityFragment extends Fragment {
         //class to store movie data
         protected class MovieInfo{
 
-            String title;
-            String synopsis;
-            String voteAverage;
-            String releaseDate;
-            String poster;
+            private String title;
+            private String synopsis;
+            private String voteAverage;
+            private String releaseDate;
+            private String poster;
 
             public String getTitle() {
                 return title;
